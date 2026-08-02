@@ -73,7 +73,7 @@ module "org" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_vcfa"></a> [vcfa](#provider\_vcfa) | 1.2.0 |
+| <a name="provider_vcfa"></a> [vcfa](#provider\_vcfa) | >= 1.0.0 |
 
 ## Modules
 
