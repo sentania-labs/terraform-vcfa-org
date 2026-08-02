@@ -79,12 +79,12 @@ variable "oidc" {
   default     = null
 
   validation {
-    condition     = var.oidc == null || contains(var.oidc.scopes, "group")
+    condition     = try(contains(var.oidc.scopes, "group"), true)
     error_message = "oidc.scopes must include \"group\": without it the token carries no group claims and AD-group login cannot work, even though user login will appear fine."
   }
 
   validation {
-    condition     = var.oidc == null || alltrue([for g in var.oidc.groups : g.name == lower(g.name)])
+    condition     = try(alltrue([for g in var.oidc.groups : g.name == lower(g.name)]), true)
     error_message = "oidc.groups[].name must be lowercase. VCFA's group-import login match is case-sensitive against the AD group name; an uppercase mismatch (e.g. \"labAdmins\" vs \"labadmins\") silently breaks login for every member of that group instead of raising an error."
   }
 }
