@@ -19,6 +19,6 @@ output "oidc_redirect_uri" {
 }
 
 output "oidc_group_role_map" {
-  description = "Validated (lowercase-checked) AD group name -> VCFA role mapping this org expects to import, from var.oidc.groups. Not wired to a resource: the vmware/vcfa provider has no group-import resource today. Empty map when var.oidc is not set."
+  description = "Validated (lowercase-checked) AD group name -> list of VCFA roles this org expects to import, from var.oidc.groups. A group name can carry more than one role (callers repeat the group name once per role), so each value is a list, not a single role string. Not wired to a resource: the vmware/vcfa provider has no group-import resource today. Empty map when var.oidc is not set."
   value       = local.oidc_group_role_map
 }

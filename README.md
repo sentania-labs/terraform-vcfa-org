@@ -39,6 +39,10 @@ UI (or a tenant-scoped API call). This module still accepts and validates `var.o
 enforced) and surfaces the mapping via `output.oidc_group_role_map`, so the intended mapping is
 recorded and checked even though this module can't create the import itself yet.
 
+A group can need more than one role (e.g. an admins group needing both Organization Administrator
+and Service Broker Admin). Express that by repeating the group name once per role; the output
+groups them, so `oidc_group_role_map` is `map(list(string))`, one entry per distinct group name.
+
 ## Example
 
 See `examples/` for a runnable example. In short:
@@ -55,6 +59,7 @@ module "org" {
     wellknown_endpoint = "https://vcf-lab-idb.int.sentania.net/acs/t/CUSTOMER/.well-known/openid-configuration"
     groups = [
       { name = "labadmins", role = "Organization Administrator" },
+      { name = "labadmins", role = "Service Broker Admin" },
     ]
   }
   oidc_client_secret = var.oidc_client_secret # from TF_VAR_, never checked in

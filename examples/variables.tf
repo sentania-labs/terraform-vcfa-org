@@ -60,7 +60,19 @@ variable "oidc" {
     })), [])
   })
   description = "OIDC federation to vIDB, or null to leave the org unfederated"
-  default     = null
+  # Defaults to a sample federation (not null) so the module's local/output evaluation over
+  # var.oidc.groups, including a group repeated across roles, is exercised without extra input.
+  # Override client_id/wellknown_endpoint/groups (or pass oidc = null) for a real apply.
+  default = {
+    client_id          = "26e6f555-7de3-456f-a23c-143a16fe6bb3"
+    wellknown_endpoint = "https://vcf-lab-idb.int.sentania.net/acs/t/CUSTOMER/.well-known/openid-configuration"
+    groups = [
+      # Same group, two roles: expressed by repeating the group name once per role.
+      { name = "labadmins", role = "Organization Administrator" },
+      { name = "labadmins", role = "Service Broker Admin" },
+      { name = "labadmins", role = "Assembler" },
+    ]
+  }
 }
 
 variable "oidc_client_secret" {
