@@ -39,6 +39,10 @@ UI (or a tenant-scoped API call). This module still accepts and validates `var.o
 enforced) and surfaces the mapping via `output.oidc_group_role_map`, so the intended mapping is
 recorded and checked even though this module can't create the import itself yet.
 
+A group can need more than one role (e.g. an admins group needing both Organization Administrator
+and Service Broker Admin). Express that by repeating the group name once per role; the output
+groups them, so `oidc_group_role_map` is `map(list(string))`, one entry per distinct group name.
+
 ## Example
 
 See `examples/` for a runnable example. In short:
@@ -55,11 +59,14 @@ module "org" {
     wellknown_endpoint = "https://vcf-lab-idb.int.sentania.net/acs/t/CUSTOMER/.well-known/openid-configuration"
     groups = [
       { name = "labadmins", role = "Organization Administrator" },
+      { name = "labadmins", role = "Service Broker Admin" },
     ]
   }
   oidc_client_secret = var.oidc_client_secret # from TF_VAR_, never checked in
 }
 ```
+
+`examples/oidc-multi-role.tfvars.example` has a copy-pasteable version of the `oidc` value above. `examples/`'s own `var.oidc` still defaults to `null`, so a plain `terraform apply` in `examples/` doesn't federate anything unless you explicitly pass `oidc`.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -109,6 +116,6 @@ No modules.
 | <a name="output_display_name"></a> [display\_name](#output\_display\_name) | Display name of the organization. |
 | <a name="output_id"></a> [id](#output\_id) | URN of the created organization. Consumed by downstream modules (e.g. org-networking) as org\_id. |
 | <a name="output_name"></a> [name](#output\_name) | Machine name of the organization. |
-| <a name="output_oidc_group_role_map"></a> [oidc\_group\_role\_map](#output\_oidc\_group\_role\_map) | Validated (lowercase-checked) AD group name -> VCFA role mapping this org expects to import, from var.oidc.groups. Not wired to a resource: the vmware/vcfa provider has no group-import resource today. Empty map when var.oidc is not set. |
+| <a name="output_oidc_group_role_map"></a> [oidc\_group\_role\_map](#output\_oidc\_group\_role\_map) | Validated (lowercase-checked) AD group name -> list of VCFA roles this org expects to import, from var.oidc.groups. A group name can carry more than one role (callers repeat the group name once per role), so each value is a list, not a single role string. Not wired to a resource: the vmware/vcfa provider has no group-import resource today. Empty map when var.oidc is not set. |
 | <a name="output_oidc_redirect_uri"></a> [oidc\_redirect\_uri](#output\_oidc\_redirect\_uri) | Redirect URI VCFA generates for the OIDC client, computed once federation is created. Register this on the vIDB-side OIDC client. Null when var.oidc is not set. |
 <!-- END_TF_DOCS -->
