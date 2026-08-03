@@ -66,6 +66,8 @@ module "org" {
 }
 ```
 
+`examples/oidc-multi-role.tfvars.example` has a copy-pasteable version of the `oidc` value above. `examples/`'s own `var.oidc` still defaults to `null`, so a plain `terraform apply` in `examples/` doesn't federate anything unless you explicitly pass `oidc`.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

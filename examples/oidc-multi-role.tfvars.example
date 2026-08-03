@@ -1,0 +1,12 @@
+# Demonstrates a single AD group needing more than one VCFA role: repeat the group name once
+# per role. Copy to a real tfvars file (or pass via -var-file) and fill in the connection vars;
+# this file alone is not auto-loaded by `terraform validate`/`plan`.
+oidc = {
+  client_id          = "26e6f555-7de3-456f-a23c-143a16fe6bb3"
+  wellknown_endpoint = "https://vcf-lab-idb.int.sentania.net/acs/t/CUSTOMER/.well-known/openid-configuration"
+  groups = [
+    { name = "labadmins", role = "Organization Administrator" },
+    { name = "labadmins", role = "Service Broker Admin" },
+    { name = "labadmins", role = "Assembler" },
+  ]
+}
