@@ -3,6 +3,11 @@ resource "vcfa_org" "this" {
   display_name = var.display_name
   description  = var.description
   is_enabled   = var.is_enabled
+
+  # ForceNew in the provider: see var.is_classic_tenant. null omits the
+  # argument entirely so orgs created before this variable existed show no
+  # diff, rather than planning a replace on the next apply.
+  is_classic_tenant = var.is_classic_tenant
 }
 
 # Always created: every org needs its settings resource, only the values are tunable

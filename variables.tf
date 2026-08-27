@@ -20,6 +20,30 @@ variable "is_enabled" {
   default     = true
 }
 
+variable "is_classic_tenant" {
+  type        = bool
+  description = <<-EOT
+    Whether the organization is a classic, vRA-style tenant (VCFA calls this
+    "VM Apps"; the provider calls it `is_classic_tenant`). A classic tenant is
+    soft tenancy: catalog, blueprints, deployments, and the legacy vmware/vra
+    resource surface. A non-classic tenant is Supervisor-backed ("All Apps"),
+    adding namespaces, Kubernetes clusters, and VM Service VMs.
+
+    IMMUTABLE. `vcfa_org.is_classic_tenant` is ForceNew in the provider
+    ("Cannot be changed once created"), and the update path ignores it
+    entirely, so changing this on an existing org plans a DESTROY AND
+    RECREATE of the org, not an in-place update. Recreating an org takes
+    its region quota, OIDC federation, local users, and every tenant object
+    inside it with it. Decide this at create time.
+
+    Defaults to null, which omits the argument and lets VCFA apply its own
+    default (non-classic / All Apps). That keeps existing orgs untouched by
+    an upgrade to this module version: a null here produces no diff against
+    state written before the argument existed.
+  EOT
+  default     = null
+}
+
 variable "org_settings" {
   type = object({
     can_create_subscribed_libraries        = optional(bool, false)
