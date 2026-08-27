@@ -20,6 +20,12 @@ variable "is_enabled" {
   default     = true
 }
 
+variable "is_classic_tenant" {
+  type        = bool
+  description = "Whether to create a VM Apps classic tenant (true) or an All Apps tenant (false). Set this explicitly for new organizations."
+  default     = false
+}
+
 variable "org_settings" {
   type = object({
     can_create_subscribed_libraries        = optional(bool, false)

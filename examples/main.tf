@@ -9,10 +9,11 @@ provider "vcfa" {
 module "org" {
   source = "../"
 
-  name         = var.org_name
-  display_name = var.org_display_name
-  description  = var.org_description
-  is_enabled   = var.is_enabled
+  name              = var.org_name
+  display_name      = var.org_display_name
+  description       = var.org_description
+  is_enabled        = var.is_enabled
+  is_classic_tenant = var.is_classic_tenant
 
   org_settings = var.org_settings
 

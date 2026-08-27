@@ -8,6 +8,19 @@ OIDC lives inside this module on purpose, it is not a separate module. An org wi
 federation wired up is not a usable org for anyone logging in through AD, so this module treats
 getting OIDC right as part of what "creating an org" means.
 
+## Organization type
+
+Set `is_classic_tenant = true` for a VM Apps organization or
+`is_classic_tenant = false` for an All Apps organization. New organizations should always set the
+type explicitly. The module input defaults to `null` only so existing module consumers can upgrade
+without introducing a classification change.
+
+The provider treats this setting as immutable. Changing it on an existing organization plans to
+replace the entire organization, including its region quota, OIDC federation, local users,
+networking, and tenant workloads. Review the complete replacement plan and prepare a teardown and
+recovery runbook before approving such an apply. Region quota must be removed before organization
+deletion where the VCFA database foreign key requires that order.
+
 ## Why this module exists
 
 Three orgs in this environment were hand-configured with OIDC, and every one of them drifted from
@@ -53,6 +66,7 @@ module "org" {
 
   name         = "vcf-lab-vm-apps"
   display_name = "VM Apps"
+  is_classic_tenant = true
 
   oidc = {
     client_id          = "26e6f555-7de3-456f-a23c-143a16fe6bb3"
@@ -101,6 +115,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_description"></a> [description](#input\_description) | Description for the organization. | `string` | `""` | no |
 | <a name="input_display_name"></a> [display\_name](#input\_display\_name) | Human-friendly display name of the organization shown in the VCFA UI. | `string` | n/a | yes |
+| <a name="input_is_classic_tenant"></a> [is\_classic\_tenant](#input\_is\_classic\_tenant) | Whether the organization is a classic, vRA-style tenant (VCFA calls this<br/>"VM Apps"; the provider calls it `is_classic_tenant`). A classic tenant is<br/>soft tenancy: catalog, blueprints, deployments, and the legacy vmware/vra<br/>resource surface. A non-classic tenant is Supervisor-backed ("All Apps"),<br/>adding namespaces, Kubernetes clusters, and VM Service VMs.<br/><br/>IMMUTABLE. `vcfa_org.is_classic_tenant` is ForceNew in the provider<br/>("Cannot be changed once created"), and the update path ignores it<br/>entirely, so changing this on an existing org plans a DESTROY AND<br/>RECREATE of the org, not an in-place update. Recreating an org takes<br/>its region quota, OIDC federation, local users, and every tenant object<br/>inside it with it. Decide this at create time.<br/><br/>Defaults to null, which omits the argument and lets VCFA apply its own<br/>default (non-classic / All Apps). That keeps existing orgs untouched by<br/>an upgrade to this module version: a null here produces no diff against<br/>state written before the argument existed. | `bool` | `null` | no |
 | <a name="input_is_enabled"></a> [is\_enabled](#input\_is\_enabled) | Whether the organization is enabled. Disabled orgs block all tenant login, including OIDC. | `bool` | `true` | no |
 | <a name="input_local_admin"></a> [local\_admin](#input\_local\_admin) | Local (non-federated) admin user to create in the org, e.g. a break-glass account. Set to null to skip creating one. The account's password is supplied separately via var.local\_admin\_password. | <pre>object({<br/>    username = string<br/>    role_ids = set(string)<br/>  })</pre> | `null` | no |
 | <a name="input_local_admin_password"></a> [local\_admin\_password](#input\_local\_admin\_password) | Password for the local admin user described in var.local\_admin. Required whenever var.local\_admin is set. No default: passwords are never shipped with a placeholder value, supply via TF\_VAR\_local\_admin\_password or an equivalent secret-injection mechanism, never in a checked-in tfvars file. | `string` | `null` | no |

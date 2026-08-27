@@ -27,14 +27,14 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.owner.login == 'sentania-labs'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Generate terraform documentation
-        uses: terraform-docs/gh-actions@v1.4.1
+        uses: terraform-docs/gh-actions@6de6da0cefcc6b4b7a5cbea4d79d97060733093c # v1.4.1
         with:
           working-dir: .
           output-file: README.md
@@ -47,22 +47,22 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.owner.login == 'sentania-labs'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - name: Cache plugin dir 
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.tflint.d/plugins
           key: ubuntu-latest-tflint-${{ hashFiles('.tflint.hcl') }}
       
       - name: Setup TFLint 
-        uses: terraform-linters/setup-tflint@v6
+        uses: terraform-linters/setup-tflint@c750028ac0f3831886a261f96da68ab58a92e7ec # v6
         with:
           tflint_version: v0.53.0
     
@@ -80,6 +80,21 @@ jobs:
         id: validate
         run: terraform validate -no-color
 
+      - name: Terraform Test
+        if: always()
+        id: test
+        run: terraform test -no-color
+
+      - name: Example Init
+        if: always()
+        id: example_init
+        run: terraform -chdir=examples init -backend=false
+
+      - name: Example Validate
+        if: always()
+        id: example_validate
+        run: terraform -chdir=examples validate -no-color
+
       - name: Terraform Fmt 
         if: always()
         id: fmt 
@@ -87,13 +102,16 @@ jobs:
     
       - name: Update PR
         if: always()
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const output = `#### Terraform Linting: \`${{ steps.lint.outcome }}\`
             #### Terraform Format: \`${{ steps.fmt.outcome }}\` 
             #### Terraform Initialization: \`${{ steps.init.outcome }}\`
             #### Terraform Validation: \`${{ steps.validate.outcome }}\`
+            #### Terraform Tests: \`${{ steps.test.outcome }}\`
+            #### Example Initialization: \`${{ steps.example_init.outcome }}\`
+            #### Example Validation: \`${{ steps.example_validate.outcome }}\`
   
             *Pushed by: @${{ github.actor }}*`;
   
