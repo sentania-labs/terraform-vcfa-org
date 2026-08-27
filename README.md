@@ -8,6 +8,19 @@ OIDC lives inside this module on purpose, it is not a separate module. An org wi
 federation wired up is not a usable org for anyone logging in through AD, so this module treats
 getting OIDC right as part of what "creating an org" means.
 
+## Organization type
+
+Set `is_classic_tenant = true` for a VM Apps organization or
+`is_classic_tenant = false` for an All Apps organization. New organizations should always set the
+type explicitly. The module input defaults to `null` only so existing module consumers can upgrade
+without introducing a classification change.
+
+The provider treats this setting as immutable. Changing it on an existing organization plans to
+replace the entire organization, including its region quota, OIDC federation, local users,
+networking, and tenant workloads. Review the complete replacement plan and prepare a teardown and
+recovery runbook before approving such an apply. Region quota must be removed before organization
+deletion where the VCFA database foreign key requires that order.
+
 ## Why this module exists
 
 Three orgs in this environment were hand-configured with OIDC, and every one of them drifted from
@@ -53,6 +66,7 @@ module "org" {
 
   name         = "vcf-lab-vm-apps"
   display_name = "VM Apps"
+  is_classic_tenant = true
 
   oidc = {
     client_id          = "26e6f555-7de3-456f-a23c-143a16fe6bb3"
