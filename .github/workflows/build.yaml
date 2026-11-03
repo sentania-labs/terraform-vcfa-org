@@ -17,23 +17,24 @@ jobs:
       github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       with:
         ref: main
         fetch-depth: 0
     
     - name: Bump version and push tag
       id: tag
-      uses: anothrNick/github-tag-action@1.75.0
+      uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
       env:
         DEFAULT_BRANCH: main
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         WITH_V: true
     
     - name: Generate release    
-      uses: marvinpinto/action-automatic-releases@latest
+      uses: softprops/action-gh-release@e598afbe1493e6b1bafb1f389cabb956eab91231 # v3.0.3
       with:
-        automatic_release_tag: ${{ steps.tag.outputs.tag }}
-        repo_token: ${{ secrets.GITHUB_TOKEN }}  
-        prerelease: false
+        tag_name: ${{ steps.tag.outputs.tag }}
+        name: ${{ steps.tag.outputs.tag }}
+        generate_release_notes: true
         draft: false
+        prerelease: false
